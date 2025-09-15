@@ -101,3 +101,70 @@ export interface ApiError {
   status?: number
   errors?: Record<string, string[]>
 }
+
+// Child related interfaces
+export interface Child {
+  id: string
+  name: string
+  age: number
+  gender: 'male' | 'female' | 'other'
+  class: string
+  hobbies: string[]
+  interests: string[]
+  user: {
+    id: string
+    email: string
+    isVerified: boolean
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ChildrenStatistics {
+  totalChildren: number
+  childrenByGender: {
+    male: number
+    female: number
+    other: number
+  }
+  childrenByAgeGroup: {
+    '0-5': number
+    '6-10': number
+    '11-15': number
+    '16-18': number
+  }
+  childrenByClass: Record<string, number>
+  verifiedUsers: number
+  unverifiedUsers: number
+}
+
+export interface ChildrenPagination {
+  currentPage: number
+  totalPages: number
+  totalCount: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
+  limit: number
+}
+
+export interface ChildrenApiResponse {
+  status: string
+  message: string
+  data: {
+    children: Child[]
+    statistics: ChildrenStatistics
+    pagination: ChildrenPagination
+  }
+}
+
+export interface ChildrenFilters {
+  page?: number
+  limit?: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  gender?: 'male' | 'female' | 'other'
+  ageGroup?: '0-5' | '6-10' | '11-15' | '16-18'
+  ageMax?: number
+  class?: string
+  search?: string
+}

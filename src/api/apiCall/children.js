@@ -87,3 +87,16 @@ export const getChildrenByParentApi = async (parentId, params = {}) => {
     throw error;
   }
 };
+
+export const getChildrenStatisticsApi = async () => {
+  try {
+    const response = await httpClient.get(API_ENDPOINTS.CHILDREN_STATISTICS, {
+      headers: {
+        'accept': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

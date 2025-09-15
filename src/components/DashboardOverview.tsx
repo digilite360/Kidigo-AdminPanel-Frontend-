@@ -22,7 +22,11 @@ import {
   Edit,
   Trash2,
   BarChart3,
-  Store
+  Store,
+  Users,
+  Baby,
+  UserCheck,
+  UserX
 } from "lucide-react"
 import { 
   DropdownMenu, 
@@ -30,38 +34,36 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
+import { getChildrenStatisticsApi } from "@/api/apiCall/children"
+import { useEffect, useState } from "react"
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
 
-// Mock data for admin - replace with real data from your API
-const adminMetrics = [
-  {
-    title: "Total Revenue",
-    value: "$45,231.89",
-    change: "+20.1%",
-    trend: "up",
-    description: "from last month"
-  },
-  {
-    title: "New Customers",
-    value: "2,350",
-    change: "+180.1%",
-    trend: "up",
-    description: "from last month"
-  },
-  {
-    title: "Active Products",
-    value: "12,234",
-    change: "+19%",
-    trend: "up",
-    description: "from last month"
-  },
-  {
-    title: "Conversion Rate",
-    value: "3.2%",
-    change: "-0.4%",
-    trend: "down",
-    description: "from last month"
-  }
-]
+// Interface for children statistics
+interface ChildrenStatistics {
+  totalChildren: number;
+  totalUsers: {
+    total: number;
+    verified: number;
+    unverified: number;
+  };
+  childrenByGender: {
+    male: number;
+    female: number;
+    other: number;
+  };
+  childrenByAgeGroup: {
+    "0-5": number;
+    "6-10": number;
+    "11-15": number;
+    "16-18": number;
+  };
+  childrenByClass: Record<string, number>;
+  recentRegistrations: {
+    users: number;
+    children: number;
+  };
+}
 
 // Mock data for vendors - replace with real data from your API
 const vendorMetrics = [
@@ -193,9 +195,78 @@ const vendorProducts = [
 
 export function DashboardOverview() {
   const { user, isVendor } = useAuth()
+  const [childrenStats, setChildrenStats] = useState<ChildrenStatistics | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch children statistics for admin users
+  useEffect(() => {
+    const fetchChildrenStatistics = async () => {
+      if (!isVendor) {
+        try {
+          setLoading(true)
+          const response = await getChildrenStatisticsApi()
+          if (response.status === 'success') {
+            setChildrenStats(response.data)
+          } else {
+            setError('Failed to fetch children statistics')
+          }
+        } catch (err) {
+          console.error('Error fetching children statistics:', err)
+          setError('Failed to fetch children statistics')
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        setLoading(false)
+      }
+    }
+
+    fetchChildrenStatistics()
+  }, [isVendor])
+
+  // Generate admin metrics from children statistics
+  const getAdminMetrics = () => {
+    if (!childrenStats) return []
+    
+    return [
+      {
+        title: "Total Children",
+        value: childrenStats.totalChildren.toString(),
+        change: `+${childrenStats.recentRegistrations.children}`,
+        trend: "up" as const,
+        description: "recently registered",
+        icon: Baby
+      },
+      {
+        title: "Total Users",
+        value: childrenStats.totalUsers.total.toString(),
+        change: `+${childrenStats.recentRegistrations.users}`,
+        trend: "up" as const,
+        description: "recently registered",
+        icon: Users
+      },
+      {
+        title: "Verified Users",
+        value: childrenStats.totalUsers.verified.toString(),
+        change: `${Math.round((childrenStats.totalUsers.verified / childrenStats.totalUsers.total) * 100)}%`,
+        trend: "up" as const,
+        description: "verification rate",
+        icon: UserCheck
+      },
+      {
+        title: "Unverified Users",
+        value: childrenStats.totalUsers.unverified.toString(),
+        change: `${Math.round((childrenStats.totalUsers.unverified / childrenStats.totalUsers.total) * 100)}%`,
+        trend: childrenStats.totalUsers.unverified > 0 ? "down" as const : "up" as const,
+        description: "need verification",
+        icon: UserX
+      }
+    ]
+  }
   
   // Select data based on user role
-  const metrics = isVendor ? vendorMetrics : adminMetrics
+  const metrics = isVendor ? vendorMetrics : (loading ? [] : getAdminMetrics())
   const recentOrders = isVendor ? vendorOrders : adminOrders
   const topProducts = isVendor ? vendorProducts : adminProducts
 
@@ -252,30 +323,234 @@ export function DashboardOverview() {
 
       {/* Metrics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {metrics.map((metric, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {metric.title}
-              </CardTitle>
-              {metric.trend === "up" ? (
-                <TrendingUp className="h-4 w-4 text-green-600" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-red-600" />
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metric.value}</div>
-              <p className="text-xs text-muted-foreground">
-                <span className={metric.trend === "up" ? "text-green-600" : "text-red-600"}>
-                  {metric.change}
-                </span>{" "}
-                {metric.description}
-              </p>
+        {loading && !isVendor ? (
+          // Loading skeleton for admin metrics
+          Array.from({ length: 4 }).map((_, index) => (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 w-16 bg-gray-200 rounded animate-pulse mb-2"></div>
+                <div className="h-3 w-32 bg-gray-200 rounded animate-pulse"></div>
+              </CardContent>
+            </Card>
+          ))
+        ) : error && !isVendor ? (
+          // Error state for admin metrics
+          <Card className="col-span-4">
+            <CardContent className="pt-6">
+              <div className="text-center text-red-600">
+                <p>Failed to load children statistics</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={() => window.location.reload()}
+                >
+                  Retry
+                </Button>
+              </div>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          // Actual metrics
+          metrics.map((metric, index) => (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {metric.title}
+                </CardTitle>
+                <div className="flex items-center space-x-1">
+                  {metric.icon && <metric.icon className="h-4 w-4 text-blue-600" />}
+                  {metric.trend === "up" ? (
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4 text-red-600" />
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{metric.value}</div>
+                <p className="text-xs text-muted-foreground">
+                  <span className={metric.trend === "up" ? "text-green-600" : "text-red-600"}>
+                    {metric.change}
+                  </span>{" "}
+                  {metric.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
+
+      {/* Additional Children Statistics for Admin */}
+      {!isVendor && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Children by Gender - Pie Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Children by Gender</CardTitle>
+              <CardDescription>Distribution of children by gender</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                // Skeleton for pie chart
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="relative">
+                    {/* Outer circle skeleton */}
+                    <div className="w-40 h-40 rounded-full bg-gray-200 animate-pulse"></div>
+                    {/* Inner circle skeleton */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-white"></div>
+                    {/* Loading text */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm text-gray-500">
+                      Loading...
+                    </div>
+                  </div>
+                </div>
+              ) : error ? (
+                <div className="h-[250px] flex items-center justify-center text-red-600">
+                  <div className="text-center">
+                    <p>Failed to load chart data</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={() => window.location.reload()}
+                    >
+                      Retry
+                    </Button>
+                  </div>
+                </div>
+              ) : childrenStats ? (
+                <ChartContainer
+                  config={{
+                    male: {
+                      label: "Male",
+                      color: "#3b82f6", // Blue
+                    },
+                    female: {
+                      label: "Female", 
+                      color: "#ec4899", // Pink
+                    },
+                  }}
+                  className="h-[250px]"
+                >
+                  <PieChart>
+                    <ChartTooltip />
+                    <Pie
+                      data={[
+                        { name: "Male", value: childrenStats.childrenByGender.male, fill: "var(--color-male)" },
+                        { name: "Female", value: childrenStats.childrenByGender.female, fill: "var(--color-female)" },
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      <Cell key="cell-male" fill="var(--color-male)" />
+                      <Cell key="cell-female" fill="var(--color-female)" />
+                    </Pie>
+                  </PieChart>
+                </ChartContainer>
+              ) : null}
+            </CardContent>
+          </Card>
+
+          {/* Children by Age Group - Bar Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Children by Age Group</CardTitle>
+              <CardDescription>Distribution of children by age</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                // Skeleton for bar chart
+                <div className="h-[250px] flex items-center justify-center">
+                  <div className="w-full space-y-4">
+                    {/* Chart area skeleton */}
+                    <div className="flex items-end justify-between h-32 space-x-2">
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="w-8 bg-gray-200 rounded-t animate-pulse" style={{ height: '60%' }}></div>
+                        <div className="w-12 h-3 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="w-8 bg-gray-200 rounded-t animate-pulse" style={{ height: '40%' }}></div>
+                        <div className="w-12 h-3 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="w-8 bg-gray-200 rounded-t animate-pulse" style={{ height: '80%' }}></div>
+                        <div className="w-12 h-3 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="w-8 bg-gray-200 rounded-t animate-pulse" style={{ height: '30%' }}></div>
+                        <div className="w-12 h-3 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                    {/* Loading text */}
+                    <div className="text-center text-sm text-gray-500">
+                      Loading chart data...
+                    </div>
+                  </div>
+                </div>
+              ) : error ? (
+                <div className="h-[250px] flex items-center justify-center text-red-600">
+                  <div className="text-center">
+                    <p>Failed to load chart data</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={() => window.location.reload()}
+                    >
+                      Retry
+                    </Button>
+                  </div>
+                </div>
+              ) : childrenStats ? (
+                <ChartContainer
+                  config={{
+                    count: {
+                      label: "Children Count",
+                      color: "#10b981", // Green
+                    },
+                  }}
+                  className="h-[250px]"
+                >
+                  <BarChart
+                    data={Object.entries(childrenStats.childrenByAgeGroup).map(([ageGroup, count]) => ({
+                      ageGroup: `${ageGroup} years`,
+                      count: count,
+                    }))}
+                    margin={{
+                      top: 20,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="ageGroup" 
+                      tick={{ fontSize: 12 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <ChartTooltip />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ChartContainer>
+              ) : null}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Charts and Tables Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">

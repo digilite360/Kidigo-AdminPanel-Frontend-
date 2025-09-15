@@ -11,9 +11,10 @@ export const API_ENDPOINTS = {
   USER_UPDATE: '/api/users/update',
   
   // Children endpoints
-  CHILDREN: '/api/children',
+  CHILDREN: '/api/admin/children',
   CHILD_PROFILE: '/api/children/profile',
   CHILD_UPDATE: '/api/children/update',
+  CHILDREN_STATISTICS: '/api/admin/children/statistics',
   
   // Vendor endpoints
   VENDORS: '/api/vendors',

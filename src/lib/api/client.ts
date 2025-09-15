@@ -11,13 +11,22 @@ export const apiClient = axios.create({
   timeout: 10000,
 })
 
-// Request interceptor for logging
+// Request interceptor for authentication and logging
 apiClient.interceptors.request.use(
   (config) => {
+    // Add auth token if available (only in browser environment)
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('authToken')
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    }
+    
     console.log('API Request:', {
       method: config.method?.toUpperCase(),
       url: config.url,
       data: config.data,
+      hasAuth: !!config.headers.Authorization,
     })
     return config
   },
@@ -27,7 +36,7 @@ apiClient.interceptors.request.use(
   }
 )
 
-// Response interceptor for logging
+// Response interceptor for logging and error handling
 apiClient.interceptors.response.use(
   (response) => {
     console.log('API Response:', {
@@ -42,6 +51,16 @@ apiClient.interceptors.response.use(
       data: error.response?.data,
       message: error.message,
     })
+    
+    // Handle unauthorized access
+    if (error.response?.status === 401) {
+      // Clear token and redirect to login (only in browser environment)
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('authToken')
+        window.location.href = '/auth/signin'
+      }
+    }
+    
     return Promise.reject(error)
   }
 )
