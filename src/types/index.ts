@@ -62,3 +62,42 @@ export interface AuthContextType {
   isAdmin: boolean
   isVendor: boolean
 }
+
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface LoginResponse {
+  success: boolean
+  message: string
+  user?: {
+    id: string
+    email: string
+    name: string
+    role: string
+  }
+  token?: string
+}
+
+// Raw API response structure
+export interface ApiLoginResponse {
+  status: string
+  message: string
+  data: {
+    token: string
+    user: {
+      id: string
+      email: string
+      name?: string
+      vendorName?: string
+      role: string
+    }
+  }
+}
+
+export interface ApiError {
+  message: string
+  status?: number
+  errors?: Record<string, string[]>
+}

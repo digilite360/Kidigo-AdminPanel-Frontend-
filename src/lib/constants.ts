@@ -17,6 +17,8 @@ export const ROUTES = {
   PROFILE: "/dashboard/profile",
   SETTINGS: "/dashboard/settings",
   USERS: "/dashboard/users",
+  CHILDREN: "/dashboard/children",
+  VENDORS: "/dashboard/vendors",
   PRODUCTS: "/dashboard/products",
   ORDERS: "/dashboard/orders",
   ANALYTICS: "/dashboard/analytics",
@@ -33,7 +35,8 @@ export const USER_ROLES = {
 export const API_ENDPOINTS = {
   AUTH: "/api/auth",
   USERS: "/api/users",
+  CHILDREN: "/api/children",
+  VENDORS: "/api/vendors",
   PRODUCTS: "/api/products",
   ORDERS: "/api/orders",
-  VENDORS: "/api/vendors",
 } as const

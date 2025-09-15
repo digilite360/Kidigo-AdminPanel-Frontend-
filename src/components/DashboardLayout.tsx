@@ -31,6 +31,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { 
   LayoutDashboard, 
   Users, 
+  Baby,
+  Store,
   Package, 
   ShoppingCart, 
   BarChart3, 
@@ -49,6 +51,16 @@ const navigation = [
     title: "Users",
     url: "/dashboard/users",
     icon: Users,
+  },
+  {
+    title: "Children",
+    url: "/dashboard/children",
+    icon: Baby,
+  },
+  {
+    title: "Vendors",
+    url: "/dashboard/vendors",
+    icon: Store,
   },
   {
     title: "Products",
@@ -88,7 +100,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <SidebarHeader>
             <div className="flex items-center gap-2 px-2 py-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Package className="h-4 w-4" />
+                <span className="text-sm font-bold">K</span>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">Kidigo Admin</span>

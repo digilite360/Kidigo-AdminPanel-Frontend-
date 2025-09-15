@@ -1,19 +1,7 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from "bcryptjs"
 import { USER_ROLES, ROUTES } from "@/lib/constants"
-import { vendors } from "@/app/api/vendors/register/route"
-
-// Mock user data - replace with your actual user database
-const users = [
-  {
-    id: "1",
-    email: "admin@kidigo.com",
-    password: "$2b$10$z.zPputTP0cANGUX3jPgQuLg4VIOziz5IspqBnatPwyHLlkgU7ZUC", // password: admin123
-    name: "Admin User",
-    role: USER_ROLES.ADMIN
-  }
-]
+import { authService } from "@/lib/api/services/auth"
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -28,43 +16,32 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        // Check admin users first
-        const adminUser = users.find((u) => u.email === credentials.email)
-        if (adminUser) {
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            adminUser.password
-          )
+        try {
+          // Use the external API for authentication
+          const loginResponse = await authService.login({
+            email: credentials.email,
+            password: credentials.password
+          })
 
-          if (isPasswordValid) {
+          if (loginResponse.success && loginResponse.user) {
+            // Store the auth token in localStorage if available
+            if (loginResponse.token && typeof window !== 'undefined') {
+              localStorage.setItem('authToken', loginResponse.token)
+            }
+
             return {
-              id: adminUser.id,
-              email: adminUser.email,
-              name: adminUser.name,
-              role: adminUser.role,
+              id: loginResponse.user.id,
+              email: loginResponse.user.email,
+              name: loginResponse.user.name,
+              role: loginResponse.user.role,
             }
           }
+
+          return null
+        } catch (error) {
+          console.error('NextAuth authorize error:', error)
+          return null
         }
-
-        // Check vendor users
-        const vendor = vendors.find((v) => v.email === credentials.email)
-        if (vendor) {
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            vendor.password
-          )
-
-          if (isPasswordValid) {
-            return {
-              id: vendor._id,
-              email: vendor.email,
-              name: vendor.vendorName,
-              role: vendor.role,
-            }
-          }
-        }
-
-        return null
       }
     })
   ],

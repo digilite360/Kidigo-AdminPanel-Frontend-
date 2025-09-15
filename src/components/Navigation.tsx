@@ -60,6 +60,28 @@ export const Navigation = () => {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
+                  <NavigationMenuTrigger>Children</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="p-4 w-48">
+                      <Link href={ROUTES.CHILDREN} className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
+                        All Children
+                      </Link>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Vendors</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="p-4 w-48">
+                      <Link href={ROUTES.VENDORS} className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
+                        All Vendors
+                      </Link>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
                   <NavigationMenuTrigger>Products</NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <div className="p-4 w-48">

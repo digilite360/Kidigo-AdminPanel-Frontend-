@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -28,73 +28,100 @@ import {
   Search, 
   Filter,
   Plus,
-  Download
+  Download,
+  Loader2
 } from "lucide-react"
+import { getUsersApi } from "@/api/apiCall/user"
 
-// Mock data - replace with real data from your API
-const users = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "admin",
-    status: "active",
-    lastLogin: "2024-01-15",
-    avatar: "",
-    joinDate: "2023-06-15"
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane.smith@example.com",
-    role: "user",
-    status: "active",
-    lastLogin: "2024-01-14",
-    avatar: "",
-    joinDate: "2023-08-20"
-  },
-  {
-    id: "3",
-    name: "Bob Johnson",
-    email: "bob.johnson@example.com",
-    role: "moderator",
-    status: "inactive",
-    lastLogin: "2024-01-10",
-    avatar: "",
-    joinDate: "2023-09-10"
-  },
-  {
-    id: "4",
-    name: "Alice Brown",
-    email: "alice.brown@example.com",
-    role: "user",
-    status: "active",
-    lastLogin: "2024-01-15",
-    avatar: "",
-    joinDate: "2023-11-05"
-  },
-  {
-    id: "5",
-    name: "Charlie Wilson",
-    email: "charlie.wilson@example.com",
-    role: "user",
-    status: "suspended",
-    lastLogin: "2024-01-08",
-    avatar: "",
-    joinDate: "2023-12-01"
-  }
-]
+// User interface based on actual API response
+interface User {
+  id: string;
+  email: string;
+  role: string;
+  isVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+  // Optional fields that might not be present
+  name?: string;
+  status?: string;
+  lastLogin?: string;
+  avatar?: string;
+  joinDate?: string;
+}
 
 export function UsersTable() {
   const [searchTerm, setSearchTerm] = useState("")
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalUsers, setTotalUsers] = useState(0)
 
+  // Fetch users from API
+  const fetchUsers = async (page: number = 1, limit: number = 10) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await getUsersApi({ page, limit })
+      
+      // Handle the actual API response structure
+      if (response.data && response.data.users) {
+        setUsers(response.data.users)
+        setTotalPages(response.data.pagination?.totalPages || 1)
+        setTotalUsers(response.data.pagination?.totalUsers || response.data.users.length)
+      } else if (response.users) {
+        setUsers(response.users)
+        setTotalPages(response.totalPages || 1)
+        setTotalUsers(response.total || response.users.length)
+      } else if (Array.isArray(response)) {
+        setUsers(response)
+        setTotalPages(1)
+        setTotalUsers(response.length)
+      } else {
+        setUsers([])
+        setTotalPages(1)
+        setTotalUsers(0)
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch users')
+      setUsers([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Load users on component mount
+  useEffect(() => {
+    fetchUsers(currentPage)
+  }, [currentPage])
+
+  // Filter users based on search term
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  // Helper function to get user display name
+  const getUserDisplayName = (user: User) => {
+    if (user.name) return user.name;
+    // Extract name from email if no name is provided
+    const emailName = user.email.split('@')[0];
+    return emailName.charAt(0).toUpperCase() + emailName.slice(1);
+  }
+
+  // Helper function to get user status
+  const getUserStatus = (user: User) => {
+    if (user.status) return user.status;
+    return user.isVerified ? 'verified' : 'unverified';
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case "verified":
+        return "bg-green-100 text-green-800"
+      case "unverified":
+        return "bg-yellow-100 text-yellow-800"
       case "active":
         return "bg-green-100 text-green-800"
       case "inactive":
@@ -168,73 +195,125 @@ export function UsersTable() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Login</TableHead>
-                <TableHead>Join Date</TableHead>
-                <TableHead className="w-[70px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.avatar} alt={user.name} />
-                        <AvatarFallback>
-                          {user.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{user.name}</div>
-                        <div className="text-sm text-muted-foreground">{user.email}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getRoleColor(user.role)}>
-                      {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(user.status)}>
-                      {user.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{user.lastLogin}</TableCell>
-                  <TableCell>{user.joinDate}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Eye className="mr-2 h-4 w-4" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit User
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete User
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Loading users...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600 mb-4">{error}</p>
+              <Button onClick={() => fetchUsers(currentPage)} variant="outline">
+                Try Again
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created Date</TableHead>
+                    <TableHead className="w-[70px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        {searchTerm ? 'No users found matching your search.' : 'No users found.'}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={user.avatar} alt={getUserDisplayName(user)} />
+                              <AvatarFallback>
+                                {getUserDisplayName(user).split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">{getUserDisplayName(user)}</div>
+                              <div className="text-sm text-muted-foreground">{user.email}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getRoleColor(user.role)}>
+                            {user.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(getUserStatus(user))}>
+                            {getUserStatus(user)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit User
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-600">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete User
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {users.length} of {totalUsers} users
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
