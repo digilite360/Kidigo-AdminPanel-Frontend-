@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { USER_ROLES, ROUTES } from "@/lib/constants"
+import { vendors } from "@/app/api/vendors/register/route"
 
 // Mock user data - replace with your actual user database
 const users = [
@@ -27,27 +28,43 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const user = users.find((u) => u.email === credentials.email)
+        // Check admin users first
+        const adminUser = users.find((u) => u.email === credentials.email)
+        if (adminUser) {
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            adminUser.password
+          )
 
-        if (!user) {
-          return null
+          if (isPasswordValid) {
+            return {
+              id: adminUser.id,
+              email: adminUser.email,
+              name: adminUser.name,
+              role: adminUser.role,
+            }
+          }
         }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
+        // Check vendor users
+        const vendor = vendors.find((v) => v.email === credentials.email)
+        if (vendor) {
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            vendor.password
+          )
 
-        if (!isPasswordValid) {
-          return null
+          if (isPasswordValid) {
+            return {
+              id: vendor._id,
+              email: vendor.email,
+              name: vendor.vendorName,
+              role: vendor.role,
+            }
+          }
         }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        }
+        return null
       }
     })
   ],

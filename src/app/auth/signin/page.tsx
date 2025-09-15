@@ -3,10 +3,12 @@
 import { useState } from "react"
 import { signIn, getSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ROUTES } from "@/lib/constants"
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
@@ -29,9 +31,15 @@ export default function SignInPage() {
 
       if (result?.error) {
         setError("Invalid credentials")
+        toast.error("Sign In Failed", {
+          description: "Invalid email or password. Please try again.",
+        })
       } else {
         const session = await getSession()
         if (session?.user) {
+          toast.success("Welcome back!", {
+            description: `Hello ${session.user.name}! You've been signed in successfully.`,
+          })
           router.push("/dashboard")
         }
       }
@@ -86,6 +94,21 @@ export default function SignInPage() {
             <p>Demo credentials:</p>
             <p>Email: admin@kidigo.com</p>
             <p>Password: admin123</p>
+          </div>
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-3">
+                Want to sell on our platform?
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push(ROUTES.AUTH.VENDOR_REGISTER)}
+              >
+                Register as a Vendor
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

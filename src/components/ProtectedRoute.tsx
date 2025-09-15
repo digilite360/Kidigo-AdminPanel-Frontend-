@@ -3,7 +3,7 @@
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Loading } from "@/components/Loading"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -34,15 +34,7 @@ export const ProtectedRoute = ({
   }, [loading, isAuthenticated, isAdmin, requireAdmin, redirectTo, router])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="space-y-4 w-full max-w-md">
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-        </div>
-      </div>
-    )
+    return <Loading />
   }
 
   if (!isAuthenticated) {

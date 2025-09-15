@@ -1,4 +1,4 @@
-import { withAuth } from "next-auth/middleware"
+   import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 import { ROUTES, USER_ROLES } from "@/lib/constants"
 
@@ -46,6 +46,7 @@ export const config = {
     "/profile/:path*",
     "/auth/signin",
     "/auth/signup",
+    "/auth/vendor-register",
     "/auth/error"
   ]
 }

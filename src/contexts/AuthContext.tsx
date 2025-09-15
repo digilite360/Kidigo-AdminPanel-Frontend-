@@ -9,6 +9,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isAuthenticated: false,
   isAdmin: false,
+  isVendor: false,
 })
 
 export const useAuth = () => {
@@ -32,12 +33,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const user = session?.user as User | null
   const isAuthenticated = !!user
   const isAdmin = user?.role === "admin"
+  const isVendor = user?.role === "vendor"
 
   const value = {
     user,
     loading,
     isAuthenticated,
     isAdmin,
+    isVendor,
   }
 
   return (

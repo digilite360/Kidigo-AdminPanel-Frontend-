@@ -41,11 +41,11 @@ export const Navigation = () => {
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <Link href={ROUTES.DASHBOARD} legacyBehavior passHref>
-                    <NavigationMenuLink className="px-4 py-2 text-sm font-medium hover:bg-gray-100 rounded-md">
+                  <NavigationMenuLink asChild>
+                    <Link href={ROUTES.DASHBOARD} className="px-4 py-2 text-sm font-medium hover:bg-gray-100 rounded-md">
                       Dashboard
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
                 
                 <NavigationMenuItem>
@@ -71,20 +71,20 @@ export const Navigation = () => {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <Link href={ROUTES.ORDERS} legacyBehavior passHref>
-                    <NavigationMenuLink className="px-4 py-2 text-sm font-medium hover:bg-gray-100 rounded-md">
+                  <NavigationMenuLink asChild>
+                    <Link href={ROUTES.ORDERS} className="px-4 py-2 text-sm font-medium hover:bg-gray-100 rounded-md">
                       Orders
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
 
                 {isAdmin && (
                   <NavigationMenuItem>
-                    <Link href={ROUTES.ADMIN} legacyBehavior passHref>
-                      <NavigationMenuLink className="px-4 py-2 text-sm font-medium hover:bg-gray-100 rounded-md">
+                    <NavigationMenuLink asChild>
+                      <Link href={ROUTES.ADMIN} className="px-4 py-2 text-sm font-medium hover:bg-gray-100 rounded-md">
                         Admin Panel
-                      </NavigationMenuLink>
-                    </Link>
+                      </Link>
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
                 )}
               </NavigationMenuList>

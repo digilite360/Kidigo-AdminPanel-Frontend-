@@ -9,6 +9,7 @@ export const ROUTES = {
   AUTH: {
     SIGNIN: "/auth/signin",
     SIGNUP: "/auth/signup",
+    VENDOR_REGISTER: "/auth/vendor-register",
     ERROR: "/auth/error",
   },
   ADMIN: "/admin",
@@ -25,6 +26,7 @@ export const ROUTES = {
 export const USER_ROLES = {
   ADMIN: "admin",
   USER: "user",
+  VENDOR: "vendor",
 } as const
 
 // API Endpoints
@@ -33,4 +35,5 @@ export const API_ENDPOINTS = {
   USERS: "/api/users",
   PRODUCTS: "/api/products",
   ORDERS: "/api/orders",
+  VENDORS: "/api/vendors",
 } as const
