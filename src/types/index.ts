@@ -36,14 +36,21 @@ export interface BusinessAddress {
 }
 
 export interface Vendor {
-  _id?: string
+  id: string
   email: string
-  password: string
   vendorName: string
   businessName: string
   businessPhone: string
-  role: string
   businessAddress: BusinessAddress
+  businessDescription?: string
+  businessWebsite?: string
+  businessDocuments?: Record<string, any>
+  role: string
+  isVerified: boolean
+  isActive: boolean
+  isApproved: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface VendorRegistrationData {
@@ -167,4 +174,66 @@ export interface ChildrenFilters {
   ageMax?: number
   class?: string
   search?: string
+}
+
+// Vendor related interfaces
+export interface VendorPagination {
+  currentPage: number
+  totalPages: number
+  totalCount: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
+  limit: number
+}
+
+export interface VendorApiResponse {
+  status: string
+  message: string
+  data: {
+    vendors: Vendor[]
+    pagination: VendorPagination
+  }
+}
+
+export interface VendorFilters {
+  page?: number
+  limit?: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  search?: string
+  isVerified?: boolean
+  isActive?: boolean
+  isApproved?: boolean
+  businessType?: string
+  city?: string
+  state?: string
+  country?: string
+}
+
+// User related interfaces
+export interface UserPagination {
+  currentPage: number
+  totalPages: number
+  totalUsers: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
+}
+
+export interface UserApiResponse {
+  status: string
+  message: string
+  data: {
+    users: User[]
+    pagination: UserPagination
+  }
+}
+
+export interface UserFilters {
+  page?: number
+  limit?: number
+  role?: string
+  isVerified?: boolean
+  search?: string
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
 }

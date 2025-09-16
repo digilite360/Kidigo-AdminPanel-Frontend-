@@ -22,12 +22,14 @@ apiClient.interceptors.request.use(
       }
     }
     
-    console.log('API Request:', {
-      method: config.method?.toUpperCase(),
-      url: config.url,
-      data: config.data,
-      hasAuth: !!config.headers.Authorization,
-    })
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('API Request:', {
+        method: config.method?.toUpperCase(),
+        url: config.url,
+        hasAuth: !!config.headers.Authorization,
+      })
+    }
     return config
   },
   (error) => {

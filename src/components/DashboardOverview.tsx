@@ -300,25 +300,6 @@ export function DashboardOverview() {
             }
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          {isVendor ? (
-            <>
-              <Button variant="outline">
-                <Store className="mr-2 h-4 w-4" />
-                My Store
-              </Button>
-              <Button>
-                <Package className="mr-2 h-4 w-4" />
-                Add Product
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline">Export</Button>
-              <Button>Add Product</Button>
-            </>
-          )}
-        </div>
       </div>
 
       {/* Metrics Cards */}
