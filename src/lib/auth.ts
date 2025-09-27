@@ -34,6 +34,7 @@ export const authOptions: NextAuthOptions = {
               email: loginResponse.user.email,
               name: loginResponse.user.name,
               role: loginResponse.user.role,
+              token: loginResponse.token,
             }
           }
 
@@ -52,6 +53,10 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role
+        // Store the auth token in the JWT token
+        if (user.token) {
+          token.authToken = user.token
+        }
       }
       return token
     },
@@ -59,6 +64,8 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as string
+        // Include the auth token in the session
+        session.token = token.authToken as string
       }
       return session
     }

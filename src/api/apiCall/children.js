@@ -1,4 +1,5 @@
 import httpClient from '../httpClient.js';
+import { apiClient } from '../../lib/api/client';
 import { API_ENDPOINTS } from '../endpoints.js';
 
 // Children API calls
@@ -90,13 +91,30 @@ export const getChildrenByParentApi = async (parentId, params = {}) => {
 
 export const getChildrenStatisticsApi = async () => {
   try {
-    const response = await httpClient.get(API_ENDPOINTS.CHILDREN_STATISTICS, {
+    console.log('Children Statistics API - Making request to:', API_ENDPOINTS.CHILDREN_STATISTICS);
+    console.log('Children Statistics API - Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
+    
+    // Check if we have a token in localStorage
+    const token = localStorage.getItem('authToken');
+    console.log('Children Statistics API - Token in localStorage:', token ? 'Found' : 'Not found');
+    
+    const response = await apiClient.get(API_ENDPOINTS.CHILDREN_STATISTICS, {
       headers: {
         'accept': 'application/json'
       }
     });
+    
+    console.log('Children Statistics API - Response received:', response.data);
     return response.data;
   } catch (error) {
+    console.error('Children Statistics API - Error:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      url: error.config?.url,
+      baseURL: error.config?.baseURL,
+      headers: error.config?.headers
+    });
     throw error;
   }
 };

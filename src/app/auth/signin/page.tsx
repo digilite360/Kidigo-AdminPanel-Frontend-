@@ -57,8 +57,15 @@ export default function SignInPage() {
       } else {
         const session = await getSession()
         console.log('Session created successfully:', session?.user)
+        console.log('Session token:', session?.token)
         
         if (session?.user) {
+          // Store the token in localStorage for API client compatibility
+          if (session.token) {
+            localStorage.setItem('authToken', session.token)
+            console.log('Token stored in localStorage')
+          }
+          
           toast.success("Welcome back!", {
             description: `Hello ${session.user.name}! You've been signed in successfully.`,
           })
