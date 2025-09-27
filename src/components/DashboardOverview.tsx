@@ -194,7 +194,7 @@ const vendorProducts = [
 ]
 
 export function DashboardOverview() {
-  const { user, isVendor } = useAuth()
+  const { user, isVendor, isAuthenticated } = useAuth()
   const [childrenStats, setChildrenStats] = useState<ChildrenStatistics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -202,7 +202,8 @@ export function DashboardOverview() {
   // Fetch children statistics for admin users
   useEffect(() => {
     const fetchChildrenStatistics = async () => {
-      if (!isVendor) {
+      // Only fetch if user is authenticated and not a vendor
+      if (isAuthenticated && !isVendor) {
         try {
           setLoading(true)
           const response = await getChildrenStatisticsApi()
@@ -222,8 +223,13 @@ export function DashboardOverview() {
       }
     }
 
-    fetchChildrenStatistics()
-  }, [isVendor])
+    // Add a small delay to ensure session is properly loaded
+    const timer = setTimeout(() => {
+      fetchChildrenStatistics()
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [isVendor, isAuthenticated, user])
 
   // Generate admin metrics from children statistics
   const getAdminMetrics = () => {

@@ -34,6 +34,11 @@ export const API_ENDPOINTS = {
     PRODUCT_BY_ID: (id: string) => `/api/admin/products/${id}`,
     PRODUCT_STATISTICS: '/api/admin/products/statistics',
     
+    // Interests management
+    INTERESTS: '/api/interests',
+    INTEREST_BY_ID: (id: string) => `/api/interests/${id}`,
+    INTEREST_STATISTICS: '/api/interests/statistics',
+    
     // Orders management
     ORDERS: '/api/admin/orders',
     ORDER_BY_ID: (id: string) => `/api/admin/orders/${id}`,

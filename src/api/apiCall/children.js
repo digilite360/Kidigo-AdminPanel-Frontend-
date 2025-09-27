@@ -1,4 +1,5 @@
 import httpClient from '../httpClient.js';
+import { apiClient } from '../../lib/api/client';
 import { API_ENDPOINTS } from '../endpoints.js';
 
 // Children API calls
@@ -90,11 +91,15 @@ export const getChildrenByParentApi = async (parentId, params = {}) => {
 
 export const getChildrenStatisticsApi = async () => {
   try {
-    const response = await httpClient.get(API_ENDPOINTS.CHILDREN_STATISTICS, {
+    // Check if we have a token in localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const response = await apiClient.get(API_ENDPOINTS.CHILDREN_STATISTICS, {
       headers: {
         'accept': 'application/json'
       }
     });
+    
     return response.data;
   } catch (error) {
     throw error;
