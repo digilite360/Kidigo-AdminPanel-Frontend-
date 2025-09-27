@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
     // Create vendor object
     const vendor = {
       _id: `vendor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `vendor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       email: body.email,
       password: hashedPassword,
       vendorName: body.vendorName,
@@ -62,6 +63,9 @@ export async function POST(request: NextRequest) {
       businessPhone: body.businessPhone,
       role: USER_ROLES.VENDOR,
       businessAddress: body.businessAddress,
+      isVerified: false,
+      isActive: true,
+      isApproved: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }

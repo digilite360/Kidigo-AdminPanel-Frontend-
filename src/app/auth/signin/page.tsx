@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ROUTES } from "@/lib/constants"
-import { authService } from "@/lib/api/services/auth"
+// import { authService } from "@/lib/api/services/auth"
 import { ApiError } from "@/types"
 
 export default function SignInPage() {
@@ -67,7 +67,7 @@ export default function SignInPage() {
           router.push("/dashboard")
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login process error:', error)
       
       let errorMessage = "An unexpected error occurred. Please try again."

@@ -4,7 +4,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useParams, useRouter } from "next/navigation"
 import { Baby, Calendar, Users, Phone, Mail, MapPin, AlertTriangle } from "lucide-react"
 
@@ -130,7 +130,6 @@ export default function ChildDetailPage() {
         <div className="mb-8 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src={child.avatar} alt={`${child.firstName} ${child.lastName}`} />
               <AvatarFallback className="text-lg">
                 {child.firstName[0]}{child.lastName[0]}
               </AvatarFallback>

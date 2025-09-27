@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -19,7 +19,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { 
   MoreHorizontal, 
   Eye, 
@@ -27,8 +27,8 @@ import {
   Trash2, 
   Search, 
   Filter,
-  Plus,
-  Download,
+  // Plus,
+  // Download,
   Loader2,
   CheckCircle,
   XCircle,
@@ -55,7 +55,7 @@ export function UsersTable() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
+  // const [totalPages, setTotalPages] = useState(1)
   const [totalUsers, setTotalUsers] = useState(0)
   const [pagination, setPagination] = useState<UserPagination | null>(null)
   const [stats, setStats] = useState<UserStats | null>(null)
@@ -67,14 +67,14 @@ export function UsersTable() {
   })
 
   // Fetch users from API
-  const fetchUsers = async (currentFilters: UserFilters = filters) => {
+  const fetchUsers = useCallback(async (currentFilters: UserFilters = filters) => {
     try {
       setLoading(true)
       setError(null)
       
       // Clean up filters to avoid sending undefined values
       const cleanFilters = Object.fromEntries(
-        Object.entries(currentFilters).filter(([_, value]) => value !== undefined && value !== null)
+        Object.entries(currentFilters).filter(([, value]) => value !== undefined && value !== null)
       )
       
       const response = await userService.getUsers(cleanFilters)
@@ -82,7 +82,7 @@ export function UsersTable() {
       if (response.status === 'success') {
         setUsers(response.data.users)
         setPagination(response.data.pagination)
-        setTotalPages(response.data.pagination.totalPages)
+        // setTotalPages(response.data.pagination.totalPages)
         setTotalUsers(response.data.pagination.totalUsers)
         
         // Calculate stats from the users data
@@ -90,15 +90,15 @@ export function UsersTable() {
       } else {
         throw new Error(response.message || 'Failed to fetch users')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching users:', err)
-      setError(err.message || 'Failed to fetch users')
+      setError(err instanceof Error ? err.message : 'Failed to fetch users')
       setUsers([])
       setPagination(null)
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
 
   // Calculate user statistics from the users data
   const calculateUserStats = (usersData: User[]) => {
@@ -120,7 +120,7 @@ export function UsersTable() {
   // Load users on component mount
   useEffect(() => {
     fetchUsers()
-  }, [])
+  }, [fetchUsers])
 
   // Handle search with debouncing
   useEffect(() => {
@@ -137,7 +137,7 @@ export function UsersTable() {
     }, 500)
 
     return () => clearTimeout(timeoutId)
-  }, [searchTerm])
+  }, [searchTerm, fetchUsers, filters])
 
   // Handle pagination
   const handlePageChange = (page: number) => {
@@ -330,7 +330,7 @@ export function UsersTable() {
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={() => {
-                      const newFilters = { page: 1, limit: 10, sortBy: 'createdAt', sortOrder: 'desc' }
+                      const newFilters = { page: 1, limit: 10, sortBy: 'createdAt', sortOrder: 'desc' as const }
                       setFilters(newFilters)
                       fetchUsers(newFilters)
                     }}
@@ -351,7 +351,7 @@ export function UsersTable() {
           ) : error ? (
             <div className="text-center py-8">
               <p className="text-red-600 mb-4">{error}</p>
-              <Button onClick={() => fetchUsers(currentPage)} variant="outline">
+              <Button onClick={() => fetchUsers()} variant="outline">
                 Try Again
               </Button>
             </div>
@@ -380,7 +380,6 @@ export function UsersTable() {
                         <TableCell>
                           <div className="flex items-center space-x-3">
                             <Avatar className="h-8 w-8">
-                              <AvatarImage src={user.avatar} alt={getUserDisplayName(user)} />
                               <AvatarFallback>
                                 {getUserDisplayName(user).split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
@@ -401,7 +400,7 @@ export function UsersTable() {
                             {getUserStatus(user)}
                           </Badge>
                         </TableCell>
-                        <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>

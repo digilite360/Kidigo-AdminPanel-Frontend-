@@ -19,7 +19,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { 
   MoreHorizontal, 
   Eye, 
@@ -76,8 +76,8 @@ export function ChildrenTable() {
       setTotalChildren(response.data.pagination.totalCount)
       setCurrentPage(response.data.pagination.currentPage)
       
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch children')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch children')
       setChildren([])
       setStatistics(null)
     } finally {
@@ -103,7 +103,7 @@ export function ChildrenTable() {
   }
 
   // Handle filter changes
-  const handleFilterChange = (key: keyof ChildrenFilters, value: any) => {
+  const handleFilterChange = (key: keyof ChildrenFilters, value: string | number | boolean | undefined) => {
     setFilters(prev => ({
       ...prev,
       [key]: value,
@@ -137,20 +137,20 @@ export function ChildrenTable() {
   }
 
   // Helper function to get age group color
-  const getAgeGroupColor = (ageGroup: string) => {
-    switch (ageGroup) {
-      case "0-5":
-        return "bg-green-100 text-green-800"
-      case "6-10":
-        return "bg-blue-100 text-blue-800"
-      case "11-15":
-        return "bg-purple-100 text-purple-800"
-      case "16-18":
-        return "bg-orange-100 text-orange-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
+  // const getAgeGroupColor = (ageGroup: string) => {
+  //   switch (ageGroup) {
+  //     case "0-5":
+  //       return "bg-green-100 text-green-800"
+  //     case "6-10":
+  //       return "bg-blue-100 text-blue-800"
+  //     case "11-15":
+  //       return "bg-purple-100 text-purple-800"
+  //     case "16-18":
+  //       return "bg-orange-100 text-orange-800"
+  //     default:
+  //       return "bg-gray-100 text-gray-800"
+  //   }
+  // }
 
   return (
     <div className="space-y-6">

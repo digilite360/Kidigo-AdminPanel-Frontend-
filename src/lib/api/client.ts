@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { getSession } from 'next-auth/react'
-import { useSession } from 'next-auth/react'
+// import { useSession } from 'next-auth/react'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.API_BASE_URL || 'http://localhost:5001'
 
@@ -31,7 +31,7 @@ apiClient.interceptors.request.use(
           if (token) {
             localStorage.setItem('authToken', token)
           }
-        } catch (error) {
+        } catch {
           // Silent error handling
         }
       }

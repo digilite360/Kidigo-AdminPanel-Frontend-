@@ -90,9 +90,9 @@ export const interestService = {
 
       const response = await apiClient.get(`${API_ENDPOINTS.ADMIN.INTERESTS}?${params.toString()}`)
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching interests:', error)
-      throw new Error(error.response?.data?.message || 'Failed to fetch interests')
+      throw new Error((error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to fetch interests')
     }
   },
 
@@ -101,9 +101,9 @@ export const interestService = {
     try {
       const response = await apiClient.get(API_ENDPOINTS.ADMIN.INTEREST_BY_ID(id))
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching interest:', error)
-      throw new Error(error.response?.data?.message || 'Failed to fetch interest')
+      throw new Error((error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to fetch interest')
     }
   },
 
@@ -112,9 +112,9 @@ export const interestService = {
     try {
       const response = await apiClient.post(API_ENDPOINTS.ADMIN.INTERESTS, interestData)
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating interest:', error)
-      throw new Error(error.response?.data?.message || 'Failed to create interest')
+      throw new Error((error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to create interest')
     }
   },
 
@@ -123,9 +123,9 @@ export const interestService = {
     try {
       const response = await apiClient.put(API_ENDPOINTS.ADMIN.INTEREST_BY_ID(id), interestData)
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating interest:', error)
-      throw new Error(error.response?.data?.message || 'Failed to update interest')
+      throw new Error((error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to update interest')
     }
   },
 
@@ -134,9 +134,9 @@ export const interestService = {
     try {
       const response = await apiClient.delete(API_ENDPOINTS.ADMIN.INTEREST_BY_ID(id))
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting interest:', error)
-      throw new Error(error.response?.data?.message || 'Failed to delete interest')
+      throw new Error((error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to delete interest')
     }
   },
 
@@ -145,9 +145,9 @@ export const interestService = {
     try {
       const response = await apiClient.get(API_ENDPOINTS.ADMIN.INTEREST_STATISTICS)
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching interest statistics:', error)
-      throw new Error(error.response?.data?.message || 'Failed to fetch interest statistics')
+      throw new Error((error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to fetch interest statistics')
     }
   }
 }

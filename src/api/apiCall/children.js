@@ -92,7 +92,7 @@ export const getChildrenByParentApi = async (parentId, params = {}) => {
 export const getChildrenStatisticsApi = async () => {
   try {
     // Check if we have a token in localStorage
-    const token = localStorage.getItem('authToken');
+    // const token = localStorage.getItem('authToken');
     
     const response = await apiClient.get(API_ENDPOINTS.CHILDREN_STATISTICS, {
       headers: {
