@@ -20,7 +20,6 @@ export interface AuthRegisterResponse {
 export const authService = {
   async login(data: LoginRequest): Promise<LoginResponse> {
     try {
-      console.log('Auth Service - Login Request:', { email: data.email, password: '[REDACTED]' })
       
       const response = await apiClient.post<ApiLoginResponse>('/api/auth/login', data)
       
@@ -38,17 +37,6 @@ export const authService = {
         token: responseData.token
       }
       
-      console.log('Auth Service - Login Response:', {
-        success: transformedResponse.success,
-        message: transformedResponse.message,
-        user: transformedResponse.user ? {
-          id: transformedResponse.user.id,
-          email: transformedResponse.user.email,
-          name: transformedResponse.user.name,
-          role: transformedResponse.user.role
-        } : null,
-        hasToken: !!transformedResponse.token
-      })
       
       return transformedResponse
     } catch (error: any) {
@@ -75,14 +63,11 @@ export const authService = {
 
   async register(data: AuthRegisterRequest): Promise<AuthRegisterResponse> {
     try {
-      console.log('Auth Service - Register Request:', data)
       
       const response = await apiClient.post<AuthRegisterResponse>('/api/auth/register', data)
       
-      console.log('Auth Service - Register Response:', response.data)
       return response.data
     } catch (error: any) {
-      console.error('Auth Service - Register Error:', error.response?.data || error.message)
       throw error
     }
   }

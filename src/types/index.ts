@@ -240,3 +240,69 @@ export interface UserFilters {
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 }
+
+// Interest related interfaces
+export interface Interest {
+  id: string
+  interest: string
+  description?: string
+  category?: string
+  priority?: 'low' | 'medium' | 'high'
+  status?: 'active' | 'inactive'
+  createdAt: string
+  updatedAt: string
+}
+
+export interface InterestStatistics {
+  totalInterests: number
+  activeInterests: number
+  inactiveInterests: number
+  highPriorityInterests: number
+  mediumPriorityInterests: number
+  lowPriorityInterests: number
+}
+
+export interface InterestPagination {
+  currentPage: number
+  totalPages: number
+  totalInterests: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
+}
+
+export interface InterestApiResponse {
+  status: string
+  message: string
+  data: {
+    interests: Interest[]
+    pagination: InterestPagination
+    statistics?: InterestStatistics
+  }
+}
+
+export interface InterestFilters {
+  page?: number
+  limit?: number
+  search?: string
+  category?: string
+  priority?: string
+  status?: string
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+}
+
+export interface CreateInterestRequest {
+  interest: string
+  description?: string
+  category?: string
+  priority?: 'low' | 'medium' | 'high'
+  status?: 'active' | 'inactive'
+}
+
+export interface UpdateInterestRequest {
+  interest?: string
+  description?: string
+  category?: string
+  priority?: 'low' | 'medium' | 'high'
+  status?: 'active' | 'inactive'
+}

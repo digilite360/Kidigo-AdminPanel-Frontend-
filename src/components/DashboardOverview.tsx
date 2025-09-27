@@ -206,11 +206,7 @@ export function DashboardOverview() {
       if (isAuthenticated && !isVendor) {
         try {
           setLoading(true)
-          console.log('Fetching children statistics...')
-          console.log('User authenticated:', isAuthenticated)
-          console.log('User role:', user?.role)
           const response = await getChildrenStatisticsApi()
-          console.log('Children statistics response:', response)
           if (response.status === 'success') {
             setChildrenStats(response.data)
           } else {
@@ -223,7 +219,6 @@ export function DashboardOverview() {
           setLoading(false)
         }
       } else {
-        console.log('Skipping children statistics fetch - not authenticated or is vendor')
         setLoading(false)
       }
     }

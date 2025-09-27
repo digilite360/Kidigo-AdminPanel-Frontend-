@@ -33,7 +33,7 @@ import {
   Users, 
   Baby,
   Store,
-  Package, 
+  Heart, 
   ShoppingCart, 
   BarChart3, 
   Settings, 
@@ -63,9 +63,9 @@ const navigation = [
     icon: Store,
   },
   {
-    title: "Products",
+    title: "Interests",
     url: "/dashboard/products",
-    icon: Package,
+    icon: Heart,
   },
   {
     title: "Orders",

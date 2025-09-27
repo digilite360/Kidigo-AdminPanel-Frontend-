@@ -36,17 +36,9 @@ export const childrenService = {
       if (filters.class) params.append('class', filters.class)
       if (filters.search) params.append('search', filters.search)
 
-      console.log('Children Service - Fetching children with filters:', filters)
       const response = await httpClient.get(`/api/admin/children?${params.toString()}`)
-      console.log('Children Service - Response received:', response.data)
       return response.data
     } catch (error: any) {
-      console.error('Children Service - Error fetching children:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        filters
-      })
       throw error
     }
   },

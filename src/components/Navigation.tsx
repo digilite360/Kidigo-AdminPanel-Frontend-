@@ -82,11 +82,11 @@ export const Navigation = () => {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger>Products</NavigationMenuTrigger>
+                  <NavigationMenuTrigger>Interests</NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <div className="p-4 w-48">
-                      <Link href={ROUTES.PRODUCTS} className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
-                        All Products
+                      <Link href={ROUTES.INTERESTS} className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
+                        All Interests
                       </Link>
                     </div>
                   </NavigationMenuContent>
