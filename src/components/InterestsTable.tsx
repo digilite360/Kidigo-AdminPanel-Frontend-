@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+// import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,15 +31,15 @@ import {
 } from "@/components/ui/dialog"
 import { 
   MoreHorizontal, 
-  Eye, 
+  // Eye, 
   Edit, 
   Trash2, 
   Search, 
-  Filter,
+  // Filter,
   Plus,
-  Download,
+  // Download,
   Heart,
-  X,
+  // X,
   Loader2
 } from "lucide-react"
 import { interestService } from "@/lib/api/services/interests"
@@ -53,8 +53,8 @@ export function InterestsTable() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [selectedInterest, setSelectedInterest] = useState<any>(null)
-  const [showFilters, setShowFilters] = useState(false)
+  const [selectedInterest, setSelectedInterest] = useState<Interest | null>(null)
+  // const [showFilters, setShowFilters] = useState(false)
 
   // Form state for create/edit
   const [formData, setFormData] = useState({
@@ -63,7 +63,7 @@ export function InterestsTable() {
 
 
   // Fetch interests from API
-  const fetchInterests = async () => {
+  const fetchInterests = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -83,19 +83,19 @@ export function InterestsTable() {
       } else {
         throw new Error(response.message || 'Failed to fetch interests')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching interests:', err)
-      setError(err.message || 'Failed to fetch interests')
+      setError(err instanceof Error ? err.message : 'Failed to fetch interests')
       setInterests([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [searchTerm])
 
   // Load interests on component mount
   useEffect(() => {
     fetchInterests()
-  }, [])
+  }, [fetchInterests])
 
   // Handle search with debouncing
   useEffect(() => {
@@ -104,7 +104,7 @@ export function InterestsTable() {
     }, 500)
 
     return () => clearTimeout(timeoutId)
-  }, [searchTerm])
+  }, [searchTerm, fetchInterests])
 
   // No need for client-side filtering since API handles it
   const filteredInterests = interests
@@ -125,9 +125,9 @@ export function InterestsTable() {
       } else {
         throw new Error(response.message || 'Failed to create interest')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating interest:', err)
-      setError(err.message || 'Failed to create interest')
+      setError(err instanceof Error ? err.message : 'Failed to create interest')
     }
   }
 
@@ -137,7 +137,7 @@ export function InterestsTable() {
         interest: formData.name
       }
 
-      const response = await interestService.updateInterest(selectedInterest.id, updateData)
+      const response = await interestService.updateInterest(selectedInterest?.id || '', updateData)
       
       if (response.status === 'success') {
         setIsEditModalOpen(false)
@@ -146,15 +146,15 @@ export function InterestsTable() {
       } else {
         throw new Error(response.message || 'Failed to update interest')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating interest:', err)
-      setError(err.message || 'Failed to update interest')
+      setError(err instanceof Error ? err.message : 'Failed to update interest')
     }
   }
 
   const handleDelete = async () => {
     try {
-      const response = await interestService.deleteInterest(selectedInterest.id)
+      const response = await interestService.deleteInterest(selectedInterest?.id || '')
       
       if (response.status === 'success') {
         setIsDeleteModalOpen(false)
@@ -162,9 +162,9 @@ export function InterestsTable() {
       } else {
         throw new Error(response.message || 'Failed to delete interest')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting interest:', err)
-      setError(err.message || 'Failed to delete interest')
+      setError(err instanceof Error ? err.message : 'Failed to delete interest')
     }
   }
 
@@ -188,9 +188,9 @@ export function InterestsTable() {
     setIsDeleteModalOpen(true)
   }
 
-  const clearFilters = () => {
-    setSearchTerm("")
-  }
+  // const clearFilters = () => {
+  //   setSearchTerm("")
+  // }
 
   return (
     <div className="space-y-6">
@@ -375,7 +375,7 @@ export function InterestsTable() {
           <DialogHeader>
             <DialogTitle>Delete Interest</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedInterest?.interest}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{selectedInterest?.interest}&quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

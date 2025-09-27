@@ -38,7 +38,7 @@ export const childrenService = {
 
       const response = await httpClient.get(`/api/admin/children?${params.toString()}`)
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw error
     }
   },
@@ -46,7 +46,7 @@ export const childrenService = {
   /**
    * Get a single child by ID
    */
-  async getChildById(id: string): Promise<{ status: string; message: string; data: any }> {
+  async getChildById(id: string): Promise<{ status: string; message: string; data: unknown }> {
     const response = await httpClient.get(`/api/admin/children/${id}`)
     return response.data
   },
@@ -54,7 +54,7 @@ export const childrenService = {
   /**
    * Create a new child
    */
-  async createChild(childData: any): Promise<{ status: string; message: string; data: any }> {
+  async createChild(childData: unknown): Promise<{ status: string; message: string; data: unknown }> {
     const response = await httpClient.post('/api/admin/children', childData)
     return response.data
   },
@@ -62,7 +62,7 @@ export const childrenService = {
   /**
    * Update a child
    */
-  async updateChild(id: string, childData: any): Promise<{ status: string; message: string; data: any }> {
+  async updateChild(id: string, childData: unknown): Promise<{ status: string; message: string; data: unknown }> {
     const response = await httpClient.put(`/api/admin/children/${id}`, childData)
     return response.data
   },

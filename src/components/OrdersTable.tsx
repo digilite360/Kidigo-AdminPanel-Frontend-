@@ -26,8 +26,8 @@ import {
   Trash2, 
   Search, 
   Filter,
-  Plus,
-  Download,
+  // Plus,
+  // Download,
   ShoppingCart
 } from "lucide-react"
 

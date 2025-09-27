@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { USER_ROLES, ROUTES } from "@/lib/constants"
+import { ROUTES } from "@/lib/constants"
 import { authService } from "@/lib/api/services/auth"
 
 export const authOptions: NextAuthOptions = {

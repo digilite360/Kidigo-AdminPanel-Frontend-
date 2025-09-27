@@ -16,13 +16,13 @@ import {
 import { 
   TrendingUp, 
   TrendingDown, 
-  Package, 
+  // Package, 
   MoreHorizontal,
   Eye,
   Edit,
   Trash2,
   BarChart3,
-  Store,
+  // Store,
   Users,
   Baby,
   UserCheck,
@@ -37,7 +37,7 @@ import {
 import { getChildrenStatisticsApi } from "@/api/apiCall/children"
 import { useEffect, useState } from "react"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
 
 // Interface for children statistics
 interface ChildrenStatistics {
@@ -350,7 +350,6 @@ export function DashboardOverview() {
                   {metric.title}
                 </CardTitle>
                 <div className="flex items-center space-x-1">
-                  {metric.icon && <metric.icon className="h-4 w-4 text-blue-600" />}
                   {metric.trend === "up" ? (
                     <TrendingUp className="h-4 w-4 text-green-600" />
                   ) : (

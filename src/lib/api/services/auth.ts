@@ -31,7 +31,7 @@ export const authService = {
         user: responseData.user ? {
           id: responseData.user.id,
           email: responseData.user.email,
-          name: responseData.user.name || responseData.user.vendorName,
+          name: responseData.user.name || responseData.user.vendorName || 'Unknown User',
           role: responseData.user.role
         } : undefined,
         token: responseData.token
@@ -39,22 +39,22 @@ export const authService = {
       
       
       return transformedResponse
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorDetails = {
-        status: error.response?.status,
-        message: error.response?.data?.message || error.message,
-        errors: error.response?.data?.errors,
-        url: error.config?.url,
-        method: error.config?.method
+        status: (error as { response?: { status?: number } })?.response?.status,
+        message: (error as { response?: { data?: { message?: string } } })?.response?.data?.message || (error as Error)?.message,
+        errors: (error as { response?: { data?: { errors?: unknown } } })?.response?.data?.errors,
+        url: (error as { config?: { url?: string } })?.config?.url,
+        method: (error as { config?: { method?: string } })?.config?.method
       }
       
       console.error('Auth Service - Login Error:', errorDetails)
       
       // Create a structured error object
       const apiError: ApiError = {
-        message: error.response?.data?.message || error.message || 'Login failed',
-        status: error.response?.status,
-        errors: error.response?.data?.errors
+        message: (error as { response?: { data?: { message?: string } } })?.response?.data?.message || (error as Error)?.message || 'Login failed',
+        status: (error as { response?: { status?: number } })?.response?.status,
+        errors: (error as { response?: { data?: { errors?: Record<string, string[]> } } })?.response?.data?.errors
       }
       
       throw apiError
@@ -67,7 +67,7 @@ export const authService = {
       const response = await apiClient.post<AuthRegisterResponse>('/api/auth/register', data)
       
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw error
     }
   }

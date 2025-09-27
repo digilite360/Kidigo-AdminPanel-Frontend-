@@ -4,7 +4,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useParams, useRouter } from "next/navigation"
 import { 
   Store, 
@@ -167,7 +167,6 @@ export default function VendorDetailPage() {
         <div className="mb-8 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src={vendor.avatar} alt={vendor.businessName} />
               <AvatarFallback className="text-lg">
                 {vendor.businessName.split(' ').map(n => n[0]).join('')}
               </AvatarFallback>

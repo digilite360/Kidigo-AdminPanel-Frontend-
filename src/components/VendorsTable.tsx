@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -19,7 +19,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { 
   MoreHorizontal, 
   Eye, 
@@ -27,18 +27,18 @@ import {
   Trash2, 
   Search, 
   Filter,
-  Plus,
-  Download,
+  // Plus,
+  // Download,
   Loader2,
   Store,
-  Star,
+  // Star,
   MapPin,
   Phone,
   Mail,
   CheckCircle,
   XCircle,
   Clock,
-  ChevronDown
+  // ChevronDown
 } from "lucide-react"
 import { vendorService } from "@/lib/api/services/vendors"
 import { Vendor, VendorFilters, VendorPagination } from "@/types"
@@ -58,7 +58,7 @@ export function VendorsTable() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
+  // const [totalPages, setTotalPages] = useState(1)
   const [totalVendors, setTotalVendors] = useState(0)
   const [pagination, setPagination] = useState<VendorPagination | null>(null)
   const [stats, setStats] = useState<VendorStats | null>(null)
@@ -70,7 +70,7 @@ export function VendorsTable() {
   })
 
   // Fetch vendors from API
-  const fetchVendors = async (currentFilters: VendorFilters = filters) => {
+  const fetchVendors = useCallback(async (currentFilters: VendorFilters = filters) => {
     try {
       setLoading(true)
       setError(null)
@@ -80,22 +80,22 @@ export function VendorsTable() {
       if (response.status === 'success') {
         setVendors(response.data.vendors)
         setPagination(response.data.pagination)
-        setTotalPages(response.data.pagination.totalPages)
+        // setTotalPages(response.data.pagination.totalPages)
         setTotalVendors(response.data.pagination.totalCount)
       } else {
         throw new Error(response.message || 'Failed to fetch vendors')
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch vendors')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch vendors')
       setVendors([])
       setPagination(null)
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
 
   // Fetch vendor statistics
-  const fetchVendorStats = async () => {
+  const fetchVendorStats = useCallback(async () => {
     try {
       const response = await vendorService.getVendorStatistics()
       if (response.status === 'success') {
@@ -110,13 +110,13 @@ export function VendorsTable() {
     } catch (err) {
       console.error('Failed to fetch vendor statistics:', err)
     }
-  }
+  }, [])
 
   // Load vendors and stats on component mount
   useEffect(() => {
     fetchVendors()
     fetchVendorStats()
-  }, [])
+  }, [fetchVendors, fetchVendorStats])
 
   // Handle search with debouncing
   useEffect(() => {
@@ -133,7 +133,7 @@ export function VendorsTable() {
     }, 500)
 
     return () => clearTimeout(timeoutId)
-  }, [searchTerm])
+  }, [searchTerm, fetchVendors, filters])
 
   // Handle pagination
   const handlePageChange = (page: number) => {
@@ -314,7 +314,7 @@ export function VendorsTable() {
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={() => {
-                      const newFilters = { page: 1, limit: 10, sortBy: 'createdAt', sortOrder: 'desc' }
+                      const newFilters = { page: 1, limit: 10, sortBy: 'createdAt', sortOrder: 'desc' as const }
                       setFilters(newFilters)
                       fetchVendors(newFilters)
                     }}
@@ -335,7 +335,7 @@ export function VendorsTable() {
           ) : error ? (
             <div className="text-center py-8">
               <p className="text-red-600 mb-4">{error}</p>
-              <Button onClick={() => fetchVendors(currentPage)} variant="outline">
+              <Button onClick={() => fetchVendors()} variant="outline">
                 Try Again
               </Button>
             </div>

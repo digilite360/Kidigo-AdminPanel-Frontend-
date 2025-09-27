@@ -28,6 +28,9 @@ export interface User {
   email: string
   name: string
   role: string
+  isVerified?: boolean
+  status?: string
+  createdAt?: string
 }
 
 export interface BusinessAddress {
@@ -47,7 +50,7 @@ export interface Vendor {
   businessAddress: BusinessAddress
   businessDescription?: string
   businessWebsite?: string
-  businessDocuments?: Record<string, any>
+  businessDocuments?: Record<string, unknown>
   role: string
   isVerified: boolean
   isActive: boolean
