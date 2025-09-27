@@ -99,20 +99,6 @@ export function AnalyticsPage() {
             View detailed analytics and performance metrics.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline">
-            <Calendar className="mr-2 h-4 w-4" />
-            Last 30 days
-          </Button>
-          <Button variant="outline">
-            <Filter className="mr-2 h-4 w-4" />
-            Filter
-          </Button>
-          <Button>
-            <Download className="mr-2 h-4 w-4" />
-            Export Report
-          </Button>
-        </div>
       </div>
 
       {/* Metrics Cards */}

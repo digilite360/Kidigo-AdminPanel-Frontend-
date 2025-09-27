@@ -123,16 +123,6 @@ export function ProductsTable() {
             Manage your product catalog and inventory.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Product
-          </Button>
-        </div>
       </div>
 
       {/* Filters and Search */}

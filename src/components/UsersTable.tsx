@@ -29,24 +29,24 @@ import {
   Filter,
   Plus,
   Download,
-  Loader2
+  Loader2,
+  CheckCircle,
+  XCircle,
+  Users,
+  UserCheck,
+  UserX,
+  Shield
 } from "lucide-react"
-import { getUsersApi } from "@/api/apiCall/user"
+import { userService } from "@/lib/api/services/users"
+import { User, UserFilters, UserPagination } from "@/types"
 
-// User interface based on actual API response
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  isVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
-  // Optional fields that might not be present
-  name?: string;
-  status?: string;
-  lastLogin?: string;
-  avatar?: string;
-  joinDate?: string;
+// Statistics interface for user stats
+interface UserStats {
+  totalUsers: number
+  verifiedUsers: number
+  unverifiedUsers: number
+  adminUsers: number
+  regularUsers: number
 }
 
 export function UsersTable() {
@@ -57,50 +57,95 @@ export function UsersTable() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalUsers, setTotalUsers] = useState(0)
+  const [pagination, setPagination] = useState<UserPagination | null>(null)
+  const [stats, setStats] = useState<UserStats | null>(null)
+  const [filters, setFilters] = useState<UserFilters>({
+    page: 1,
+    limit: 10,
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
+  })
 
   // Fetch users from API
-  const fetchUsers = async (page: number = 1, limit: number = 10) => {
+  const fetchUsers = async (currentFilters: UserFilters = filters) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await getUsersApi({ page, limit })
       
-      // Handle the actual API response structure
-      if (response.data && response.data.users) {
+      // Clean up filters to avoid sending undefined values
+      const cleanFilters = Object.fromEntries(
+        Object.entries(currentFilters).filter(([_, value]) => value !== undefined && value !== null)
+      )
+      
+      const response = await userService.getUsers(cleanFilters)
+      
+      if (response.status === 'success') {
         setUsers(response.data.users)
-        setTotalPages(response.data.pagination?.totalPages || 1)
-        setTotalUsers(response.data.pagination?.totalUsers || response.data.users.length)
-      } else if (response.users) {
-        setUsers(response.users)
-        setTotalPages(response.totalPages || 1)
-        setTotalUsers(response.total || response.users.length)
-      } else if (Array.isArray(response)) {
-        setUsers(response)
-        setTotalPages(1)
-        setTotalUsers(response.length)
+        setPagination(response.data.pagination)
+        setTotalPages(response.data.pagination.totalPages)
+        setTotalUsers(response.data.pagination.totalUsers)
+        
+        // Calculate stats from the users data
+        calculateUserStats(response.data.users)
       } else {
-        setUsers([])
-        setTotalPages(1)
-        setTotalUsers(0)
+        throw new Error(response.message || 'Failed to fetch users')
       }
     } catch (err: any) {
+      console.error('Error fetching users:', err)
       setError(err.message || 'Failed to fetch users')
       setUsers([])
+      setPagination(null)
     } finally {
       setLoading(false)
     }
   }
 
+  // Calculate user statistics from the users data
+  const calculateUserStats = (usersData: User[]) => {
+    const totalUsers = usersData.length
+    const verifiedUsers = usersData.filter(user => user.isVerified).length
+    const unverifiedUsers = usersData.filter(user => !user.isVerified).length
+    const adminUsers = usersData.filter(user => user.role === 'admin').length
+    const regularUsers = usersData.filter(user => user.role === 'user').length
+
+    setStats({
+      totalUsers,
+      verifiedUsers,
+      unverifiedUsers,
+      adminUsers,
+      regularUsers
+    })
+  }
+
   // Load users on component mount
   useEffect(() => {
-    fetchUsers(currentPage)
-  }, [currentPage])
+    fetchUsers()
+  }, [])
 
-  // Filter users based on search term
-  const filteredUsers = users.filter(user =>
-    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Handle search with debouncing
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchTerm !== '') {
+        const newFilters = { ...filters, search: searchTerm, page: 1 }
+        setFilters(newFilters)
+        fetchUsers(newFilters)
+      } else {
+        const newFilters = { ...filters, search: undefined, page: 1 }
+        setFilters(newFilters)
+        fetchUsers(newFilters)
+      }
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm])
+
+  // Handle pagination
+  const handlePageChange = (page: number) => {
+    const newFilters = { ...filters, page }
+    setFilters(newFilters)
+    setCurrentPage(page)
+    fetchUsers(newFilters)
+  }
 
   // Helper function to get user display name
   const getUserDisplayName = (user: User) => {
@@ -156,16 +201,64 @@ export function UsersTable() {
             Manage your users and their permissions.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add User
-          </Button>
-        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalUsers || stats?.totalUsers || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              All registered users
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Verified Users</CardTitle>
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.verifiedUsers || users.filter(user => user.isVerified).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Email verified
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Unverified Users</CardTitle>
+            <UserX className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.unverifiedUsers || users.filter(user => !user.isVerified).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Pending verification
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Admin Users</CardTitle>
+            <Shield className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.adminUsers || users.filter(user => user.role === 'admin').length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Admin privileges
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters and Search */}
@@ -188,9 +281,64 @@ export function UsersTable() {
                   className="pl-8 w-[300px]"
                 />
               </div>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Filter className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      const newFilters = { ...filters, role: 'admin', page: 1 }
+                      setFilters(newFilters)
+                      fetchUsers(newFilters)
+                    }}
+                  >
+                    <Shield className="mr-2 h-4 w-4" />
+                    Show Admins Only
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      const newFilters = { ...filters, role: 'user', page: 1 }
+                      setFilters(newFilters)
+                      fetchUsers(newFilters)
+                    }}
+                  >
+                    <Users className="mr-2 h-4 w-4" />
+                    Show Regular Users Only
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      const newFilters = { ...filters, isVerified: true, page: 1 }
+                      setFilters(newFilters)
+                      fetchUsers(newFilters)
+                    }}
+                  >
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Show Verified Only
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      const newFilters = { ...filters, isVerified: false, page: 1 }
+                      setFilters(newFilters)
+                      fetchUsers(newFilters)
+                    }}
+                  >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Show Unverified Only
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      const newFilters = { page: 1, limit: 10, sortBy: 'createdAt', sortOrder: 'desc' }
+                      setFilters(newFilters)
+                      fetchUsers(newFilters)
+                    }}
+                  >
+                    Clear Filters
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardHeader>
@@ -220,14 +368,14 @@ export function UsersTable() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.length === 0 ? (
+                  {users.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8">
                         {searchTerm ? 'No users found matching your search.' : 'No users found.'}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredUsers.map((user) => (
+                    users.map((user) => (
                       <TableRow key={user.id}>
                         <TableCell>
                           <div className="flex items-center space-x-3">
@@ -284,28 +432,28 @@ export function UsersTable() {
               </Table>
               
               {/* Pagination */}
-              {totalPages > 1 && (
+              {pagination && pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4">
                   <div className="text-sm text-muted-foreground">
-                    Showing {users.length} of {totalUsers} users
+                    Showing {users.length} of {pagination.totalUsers} users
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={!pagination.hasPrevPage}
                     >
                       Previous
                     </Button>
                     <span className="text-sm">
-                      Page {currentPage} of {totalPages}
+                      Page {pagination.currentPage} of {pagination.totalPages}
                     </span>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                      disabled={currentPage === totalPages}
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={!pagination.hasNextPage}
                     >
                       Next
                     </Button>

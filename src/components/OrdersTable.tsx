@@ -138,16 +138,6 @@ export function OrdersTable() {
             Manage and track customer orders.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Order
-          </Button>
-        </div>
       </div>
 
       {/* Filters and Search */}
