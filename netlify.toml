@@ -4,12 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  NEXTAUTH_URL = "https://kidigoadminpanel.netlify.app"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-# NextAuth.js configuration
-[build.environment]
-  NEXTAUTH_URL = "https://kidigoadminpanel.netlify.app"
