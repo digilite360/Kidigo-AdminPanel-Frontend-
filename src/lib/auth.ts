@@ -24,11 +24,6 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (loginResponse.success && loginResponse.user) {
-            // Store the auth token in localStorage if available
-            if (loginResponse.token && typeof window !== 'undefined') {
-              localStorage.setItem('authToken', loginResponse.token)
-            }
-
             return {
               id: loginResponse.user.id,
               email: loginResponse.user.email,
@@ -47,8 +42,13 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
   },
+  jwt: {
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
+  debug: process.env.NODE_ENV === "development",
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -61,17 +61,34 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.sub!
-        session.user.role = token.role as string
-        // Include the auth token in the session
-        session.token = token.authToken as string
+      try {
+        if (token) {
+          session.user.id = token.sub!
+          session.user.role = token.role as string
+          // Include the auth token in the session
+          session.token = token.authToken as string
+        }
+        return session
+      } catch (error) {
+        console.error('NextAuth session callback error:', error)
+        return session
       }
-      return session
     }
   },
   pages: {
     signIn: ROUTES.AUTH.SIGNIN,
     error: ROUTES.AUTH.ERROR
+  },
+  events: {
+    async signIn({ user, account, profile }) {
+      console.log('User signed in:', user.email)
+    },
+    async signOut({ token }) {
+      console.log('User signed out')
+    },
+    async session({ session, token }) {
+      // This is called every time a session is checked
+      return session
+    }
   }
 }
