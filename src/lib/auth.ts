@@ -80,15 +80,11 @@ export const authOptions: NextAuthOptions = {
     error: ROUTES.AUTH.ERROR
   },
   events: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user }) {
       console.log('User signed in:', user.email)
     },
-    async signOut({ token }) {
+    async signOut() {
       console.log('User signed out')
-    },
-    async session({ session, token }) {
-      // This is called every time a session is checked
-      return session
     }
   }
 }

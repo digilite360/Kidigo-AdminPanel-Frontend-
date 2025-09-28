@@ -3,7 +3,6 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { Loading } from "@/components/Loading"
 import { ROUTES } from "@/lib/constants"
 
 export default function Home() {
