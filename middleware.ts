@@ -15,8 +15,8 @@ export default withAuth(
       return NextResponse.next()
     }
 
-    // Redirect authenticated users away from auth pages
-    if (isAuth && isAuthPage) {
+    // Redirect authenticated users away from auth pages (except error page)
+    if (isAuth && isAuthPage && req.nextUrl.pathname !== ROUTES.AUTH.ERROR) {
       return NextResponse.redirect(new URL(ROUTES.DASHBOARD, req.url))
     }
 
@@ -46,7 +46,6 @@ export const config = {
     "/profile/:path*",
     "/auth/signin",
     "/auth/signup",
-    "/auth/vendor-register",
-    "/auth/error"
+    "/auth/vendor-register"
   ]
 }

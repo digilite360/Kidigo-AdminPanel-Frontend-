@@ -59,7 +59,10 @@ apiClient.interceptors.response.use(
       // Clear token and redirect to login (only in browser environment)
       if (typeof window !== 'undefined') {
         localStorage.removeItem('authToken')
-        window.location.href = '/auth/signin'
+        // Only redirect if not already on an auth page to prevent loops
+        if (!window.location.pathname.startsWith('/auth/')) {
+          window.location.href = '/auth/signin'
+        }
       }
     }
     
